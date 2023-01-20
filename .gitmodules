@@ -1,3 +1,6 @@
 [submodule "nam"]
 	path = nam
 	url = git@github.com:krzysztof-kacprzyk/nam.git
+[submodule "pmlb"]
+	path = pmlb
+	url = git@github.com:krzysztof-kacprzyk/pmlb.git
