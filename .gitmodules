@@ -1,0 +1,3 @@
+[submodule "nam"]
+	path = nam
+	url = git@github.com:krzysztof-kacprzyk/nam.git
