@@ -1,6 +1,8 @@
 [submodule "nam"]
 	path = nam
 	url = git@github.com:krzysztof-kacprzyk/nam.git
+	branch = share
 [submodule "pmlb"]
 	path = pmlb
 	url = git@github.com:krzysztof-kacprzyk/pmlb.git
+	branch = share
