@@ -135,3 +135,12 @@ tb_logs/
 output/
 
 .lr*
+
+checkpoints/
+
+hall_of_fame_*
+
+*cached_results.pkl
+*cached_results.csv
+*_share.pkl
+*.pdf
