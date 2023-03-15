@@ -10,17 +10,18 @@ dependencies:
     - tensorboard
     - scipy
     - pytorch
-    - torchvision
-    - torchaudio
-    - pytorch-cuda=11.7
+    # - torchvision
+    # - torchaudio
+    # - pytorch-cuda=11.7
     - tensorboard
-    - py-xgboost
+    # - py-xgboost
+    - pytorch-lightning
     - pip
     - pip:
-        - julia
-        - pysr
+        # - julia
+        # - pysr
         - -e ./pmlb
-        - -e ./nam
+        # - -e ./nam
 
 channels:
     - defaults
