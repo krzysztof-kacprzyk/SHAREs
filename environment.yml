@@ -1,0 +1,32 @@
+name: share
+
+dependencies:
+    - python=3.9
+    - jupyter
+    - numpy
+    - pandas
+    - matplotlib
+    - scikit-learn
+    - tensorboard
+    - scipy
+    - pytorch
+    - torchvision
+    - torchaudio
+    - pytorch-cuda=11.7
+    - tensorboard
+    - py-xgboost
+    - pip
+    - pip:
+        - julia
+        - pysr
+        - -e ./pmlb
+        - -e ./nam
+
+channels:
+    - defaults
+    - conda-forge
+    - pytorch
+    - nvidia
+
+
+
