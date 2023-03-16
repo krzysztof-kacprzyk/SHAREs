@@ -1,0 +1,29 @@
+name: share
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - jupyter=1.0.0
+  - matplotlib=3.6.3
+  - numpy=1.23.5
+  - pandas=1.5.3
+  - pip=22.3.1
+  - py-xgboost=1.7.1
+  - python=3.9.16
+  - pytorch=1.13.1
+  - pytorch-cuda=11.7
+  - scikit-learn=1.2.0
+  - scipy=1.10.0
+  - tensorboard=2.11.2
+  - pip:
+      - interpret==0.3.0
+      - julia==0.6.0
+      - pysr==0.11.12
+      - pytorch-lightning==1.9.0
+      - sympy==1.11.1
+      - torchaudio==0.13.1
+      - torchvision==0.14.1
+      - -e ./pmlb
+
