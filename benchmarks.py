@@ -1,3 +1,4 @@
+import os
 from pmlb import fetch_data
 from sklearn.model_selection import KFold, ParameterGrid, ParameterSampler, StratifiedKFold, train_test_split, StratifiedShuffleSplit, RandomizedSearchCV
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, FunctionTransformer, OrdinalEncoder
@@ -21,6 +22,7 @@ import argparse
 import operator
 import functools
 from tqdm import tqdm
+import pandas as pd
 
 import scipy
 
@@ -244,14 +246,14 @@ def score(model, X, y_true, task, raw=False):
             res = mean_squared_error(y_true,y_pred)
         else:
             res = r2_score(y_true,y_pred)
-        # print(f"{dataset_name} | {model} | RMSE: {score}")
+        print(f"{model} | score: {score}")
     elif task == 'classification':
         y_pred_proba = model.predict_proba(X)[:, 1]
         if raw:
             res = log_loss(y_true,y_pred)
         else:
             res = roc_auc_score(y_true,y_pred_proba)
-        # print(f"{dataset_name} | {model} | ROC-AUC: {score}")
+        print(f"{model} | score: {score}")
     return res
 
 def find_extremum(operation, itera, min_or_max):
@@ -288,6 +290,18 @@ def create_categorical_variable_dict(dataset_name,task):
 
 
 def run_experiment(dataset_name, org_model, parameter_dict, task, random_state, return_model=False):
+
+    df = pd.DataFrame(columns=['dataset','model','fold','score','time'])
+
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+
+    model_name = org_model.__class__.__name__
+
+    file_name = f"{dataset_name}_{model_name}_{timestamp}.csv"
+
+    file_path = os.path.join('results',file_name)
+
+
     if not isinstance(org_model, LinearRegression): 
         org_model.set_params(random_state=random_state)
     random_state = check_random_state(random_state)
@@ -361,6 +375,8 @@ def run_experiment(dataset_name, org_model, parameter_dict, task, random_state, 
     cv_scores = []
 
     for i, (train_index, test_index) in tqdm(enumerate(splitter.split(X_train,y_train))):
+
+        time_start = time.time()
         
         X_cv_train, y_cv_train = X_train.iloc[train_index], y_train.iloc[train_index]
         X_cv_test, y_cv_test = X_train.iloc[test_index], y_train.iloc[test_index]
@@ -394,7 +410,23 @@ def run_experiment(dataset_name, org_model, parameter_dict, task, random_state, 
             model.set_params(**best_params)
 
         model.fit(X_cv_train, y_cv_train)
-        cv_scores.append(score(model,X_cv_test,y_cv_test,task))
+        new_score = score(model,X_cv_test,y_cv_test,task)
+        cv_scores.append(new_score)
+        print(cv_scores)
+
+        time_end = time.time()
+
+        # Create a new dataframe row
+        new_df_row = pd.DataFrame({
+            'dataset': [dataset_name],
+            'model': [model_name],
+            'fold': [i],
+            'score': [new_score],
+            'time': [time_end-time_start]
+        })
+        # Append the new row to the dataframe
+        df = pd.concat([df, new_df_row], ignore_index=True)
+        df.to_csv(file_path)
     
     if return_model:
         return np.mean(cv_scores), np.std(cv_scores), model
