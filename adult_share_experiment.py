@@ -7,17 +7,16 @@ from utils import create_df_from_cached_results, load_share_from_checkpoint, eva
 import torch
 from sklearn.metrics import r2_score
 from benchmarks import run_experiment, categorical_variables_per_dataset, create_categorical_variable_dict
-from load_data import load_data
 
 if __name__ == "__main__":
 
-    device = 'cpu'
+    device = 'cpu' # 'cpu' or 'cuda'
     n_jobs = 1
-    population_size = 100
-    generations = 10
-    dataset_name = "boston"
+    population_size = 1
+    generations = 1
+    dataset_name = "adult"
 
-    task = 'regression'
+    task = 'classification'
     global_seed = 42
 
     constructor_dict_ShapeNN = {
@@ -50,10 +49,10 @@ if __name__ == "__main__":
             'tol':1e-3,
             'task':task,
             'device':device,
-            'batch_size':2000,
+            'batch_size':1000,
             'shape_class':ShapeNN,
             'constructor_dict': constructor_dict_ShapeNN,
-            'num_workers_dataloader': 0,
+            'num_workers_dataloader': 1,
             'seed':42
             }
         }

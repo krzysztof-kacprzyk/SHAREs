@@ -142,7 +142,7 @@ categorical_variables_per_dataset = {
     '225_puma8NH':[],
     '344_mv':[2,6,7],
     '564_fried':[],
-    'adult':[9],
+    'adult':[1,3,5,6,7,8,9,13],
     'australian':[0,3,7,8,10,11],
     'breast_w':[],
     'breast':[],
@@ -291,7 +291,7 @@ def create_categorical_variable_dict(dataset_name,task):
 
 def run_experiment(dataset_name, org_model, parameter_dict, task, random_state, return_model=False):
 
-    df = pd.DataFrame(columns=['dataset','model','fold','score','time'])
+    df = pd.DataFrame(columns=['dataset','model','fold','score','time','timestamp'])
 
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 
@@ -363,8 +363,11 @@ def run_experiment(dataset_name, org_model, parameter_dict, task, random_state, 
             ('std',StandardScaler())
         ])
 
-
-    y_scaler = StandardScaler()
+    if task == 'classification':
+        # Identity transformer for classification
+        y_scaler = FunctionTransformer(lambda x: x.values)
+    else:
+        y_scaler = StandardScaler()
 
     if task == 'classification':
         splitter = StratifiedKFold(n_splits=10,shuffle=True,random_state=random_state)
@@ -409,6 +412,12 @@ def run_experiment(dataset_name, org_model, parameter_dict, task, random_state, 
         if best_params is not None:
             model.set_params(**best_params)
 
+        if isinstance(org_model, SymbolicRegressor) or isinstance(org_model, SymbolicClassifier):
+            if i == 0:
+                model.optim_dict['keep_models'] = True
+            else:
+                model.optim_dict['keep_models'] = False
+
         model.fit(X_cv_train, y_cv_train)
         new_score = score(model,X_cv_test,y_cv_test,task)
         cv_scores.append(new_score)
@@ -416,13 +425,20 @@ def run_experiment(dataset_name, org_model, parameter_dict, task, random_state, 
 
         time_end = time.time()
 
+        # Check if model has timestamp parameter
+        if hasattr(model, 'timestamp'):
+            fold_timestamp = model.timestamp
+        else:
+            fold_timestamp = "Not available"
+
         # Create a new dataframe row
         new_df_row = pd.DataFrame({
             'dataset': [dataset_name],
             'model': [model_name],
             'fold': [i],
             'score': [new_score],
-            'time': [time_end-time_start]
+            'time': [time_end-time_start],
+            'timestamp':[fold_timestamp]
         })
         # Append the new row to the dataframe
         df = pd.concat([df, new_df_row], ignore_index=True)
