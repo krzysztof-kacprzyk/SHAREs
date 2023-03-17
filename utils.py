@@ -55,14 +55,15 @@ def create_df_from_cached_results(results_dict):
 
 
 
-def load_share_from_checkpoint(timestamp, program, checkpoint_dir='checkpoints', task='regression',n_features=3):
+def load_share_from_checkpoint(timestamp, program, checkpoint_dir='checkpoints', task='regression',n_features=3,equation_id=None, categorical_variables_dict={}):
     # TODO: make it work in general, pickle configs and then load them
     if isinstance(program,str):
         # remove brackets
-        program = program.replace('(','')
+        program = program.replace('(',',')
         program = program.replace(')','')
         program = program.replace("'","")
         program = program.replace(" ","")
+        program = program.replace("X","")
         program_list = program.split(',')
         new_program_list = []
         for node in program_list:
@@ -121,8 +122,8 @@ def load_share_from_checkpoint(timestamp, program, checkpoint_dir='checkpoints',
     }
 
     program = _Program(**program_config, program=program_list)
-    program.categorical_variables_dict = {}
-    program.keys = []
+    program.categorical_variables_dict = categorical_variables_dict
+    program.keys = sorted(categorical_variables_dict.keys())
 
     population_size = 500
     generations = 10
@@ -164,16 +165,21 @@ def load_share_from_checkpoint(timestamp, program, checkpoint_dir='checkpoints',
         }
 
     program_str = str(program)
-
-    full_path = os.path.join(checkpoint_dir,timestamp,f"{program_str}-best_val_loss.ckpt")
+    
+        
+        
+    if equation_id is None:
+        full_path = os.path.join(checkpoint_dir,timestamp,f"{program_str}-best_val_loss.ckpt")
+    else:
+        full_path = os.path.join(checkpoint_dir,timestamp,f"{equation_id}-best_val_loss.ckpt")
 
     if program.is_fitting_necessary([]):
-        model = LitModel(program)
+        # model = LitModel(program)
         # print(model)
         model = LitModel.load_from_checkpoint(full_path, program=program,strict=True)
         program.model = model
 
-    esr = SymbolicRegressor(**gp_config, categorical_variables={})
+    esr = SymbolicRegressor(**gp_config, categorical_variables=categorical_variables_dict)
     esr._program = program
     esr.n_features_in_ = n_features
 
