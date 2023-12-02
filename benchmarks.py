@@ -289,7 +289,7 @@ def create_categorical_variable_dict(dataset_name,task):
 
 
 
-def run_experiment(dataset_name, org_model, parameter_dict, task, random_state, return_model=False):
+def run_experiment(dataset_name, org_model, parameter_dict, task, random_state, return_model=False, disable_ohe=False):
 
     df = pd.DataFrame(columns=['dataset','model','fold','score','time','timestamp'])
 
@@ -329,7 +329,7 @@ def run_experiment(dataset_name, org_model, parameter_dict, task, random_state, 
     cat_cols = X.columns.values[is_cat]
     num_cols = X.columns.values[~is_cat]
 
-    if isinstance(org_model, SymbolicRegressor) or isinstance(org_model, SymbolicClassifier):
+    if isinstance(org_model, SymbolicRegressor) or isinstance(org_model, SymbolicClassifier) or disable_ohe:
         categories = []
         for i in categorical_variables:
             uniques = list(X.iloc[:,i].unique())
@@ -337,6 +337,7 @@ def run_experiment(dataset_name, org_model, parameter_dict, task, random_state, 
         
         cat_pipe = Pipeline([('ordinal', OrdinalEncoder(categories=categories))])
         num_pipe = Pipeline([('std',StandardScaler())])
+        # num_pipe = Pipeline([('identity', FunctionTransformer(lambda x: x.values))])
         transformers = [
             ('cat', cat_pipe, cat_cols),
             ('num', num_pipe, num_cols)
@@ -602,7 +603,7 @@ def main():
 
 
 
-    global_seed = 0
+    global_seed = 42
     np.random.seed(global_seed)
 
     dt = datetime.now().strftime("%Y-%m-%dT%H.%M.%S")
