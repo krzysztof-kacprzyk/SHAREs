@@ -144,3 +144,5 @@ hall_of_fame_*
 *cached_results.csv
 *_share.pkl
 *.pdf
+
+scratchpad/
